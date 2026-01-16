@@ -1,6 +1,7 @@
 package main
 
 import (
+	_ "embed"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -15,6 +16,9 @@ import (
 	"github.com/user/claude-permissions-hook/parser"
 )
 
+//go:embed default-config.toml
+var defaultConfig string
+
 func main() {
 	if len(os.Args) < 2 {
 		printUsage()
@@ -24,6 +28,8 @@ func main() {
 	switch os.Args[1] {
 	case "run":
 		runCmd(os.Args[2:])
+	case "init":
+		initCmd(os.Args[2:])
 	case "validate":
 		validateCmd(os.Args[2:])
 	case "analyze":
@@ -43,18 +49,63 @@ func printUsage() {
 	fmt.Println(`claude-permissions-hook - A PreToolUse hook for Claude Code
 
 Commands:
+  init      Initialize a default configuration file
   run       Run as a Claude Code hook (reads JSON from stdin)
   validate  Validate a configuration file
   analyze   Analyze a session allowlist and suggest patterns
   parse     Parse a shell command and show its structure
 
 Usage:
+  claude-permissions-hook init
   claude-permissions-hook run --config <config.toml>
   claude-permissions-hook validate --config <config.toml>
   claude-permissions-hook analyze --allowlist <permissions.json>
   claude-permissions-hook parse <command>
 
 For more information, see the README.md`)
+}
+
+// initCmd creates a default configuration file
+func initCmd(args []string) {
+	fs := flag.NewFlagSet("init", flag.ExitOnError)
+	fs.Parse(args)
+
+	// Get config path
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error getting home directory: %v\n", err)
+		os.Exit(1)
+	}
+
+	configDir := homeDir + "/.config"
+	configPath := configDir + "/claude-permissions.toml"
+
+	// Check if config already exists
+	if _, err := os.Stat(configPath); err == nil {
+		fmt.Printf("Config already exists at %s\n", configPath)
+		fmt.Println("Delete it first if you want to regenerate.")
+		os.Exit(1)
+	}
+
+	// Ensure .config directory exists
+	if err := os.MkdirAll(configDir, 0755); err != nil {
+		fmt.Fprintf(os.Stderr, "Error creating config directory: %v\n", err)
+		os.Exit(1)
+	}
+
+	// Write default config
+	if err := os.WriteFile(configPath, []byte(defaultConfig), 0644); err != nil {
+		fmt.Fprintf(os.Stderr, "Error writing config: %v\n", err)
+		os.Exit(1)
+	}
+
+	fmt.Printf("✅ Created %s\n\n", configPath)
+	fmt.Println("Next step: Run /hooks in Claude Code and add a PreToolUse hook:")
+	fmt.Println()
+	fmt.Println("  Matcher: Bash")
+	fmt.Printf("  Command: claude-permissions-hook run --config %s\n", configPath)
+	fmt.Println()
+	fmt.Println("Edit the config to customize which commands are allowed/denied.")
 }
 
 // runCmd executes the hook using the provided configuration

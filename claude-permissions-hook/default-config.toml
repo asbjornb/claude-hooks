@@ -1,0 +1,68 @@
+# Claude Code Permissions Hook - Default Configuration
+# Docs: https://github.com/asbjornb/claude-hooks
+#
+# This is a minimal starting point. Add rules for your stack below.
+# See example.toml for more ideas.
+
+[audit]
+audit_file = ""  # Set to "/tmp/claude-permissions.log" to enable
+audit_level = "matched"  # off, matched, all
+
+# =============================================================================
+# DENY RULES - Checked first, blocks commands entirely
+# =============================================================================
+
+# Block push to remote - you stay in control of what goes to the remote
+[[deny]]
+tool = "Bash"
+description = "Block git push"
+commands = ["git push"]
+
+# =============================================================================
+# ALLOW RULES - Auto-approve these commands
+# =============================================================================
+
+# Safe git commands (no history manipulation)
+[[allow]]
+tool = "Bash"
+description = "Git version control (safe subset)"
+commands = [
+    "git add",
+    "git commit",
+    "git status",
+    "git diff",
+    "git log",
+    "git branch",
+    "git checkout",
+    "git switch",
+    "git fetch",
+    "git stash",
+    "git show",
+    "git rev-parse",
+    "git remote",
+    "git tag",
+]
+exclude_patterns = ["&", ";", "\\|", "`", "\\$\\("]
+
+# =============================================================================
+# ADD YOUR STACK BELOW
+# =============================================================================
+# Examples - uncomment and modify as needed:
+#
+# [[allow]]
+# tool = "Bash"
+# description = "dotnet CLI"
+# commands = ["dotnet build", "dotnet test", "dotnet run", "dotnet restore"]
+# exclude_patterns = ["&", ";", "\\|", "`", "\\$\\("]
+#
+# [[allow]]
+# tool = "Bash"
+# description = "dotnet with timeout"
+# commands = ["timeout dotnet"]  # matches timeout 30/45/120/etc dotnet run/build/test
+# exclude_patterns = ["&", ";", "\\|", "`", "\\$\\("]
+#
+# [[allow]]
+# tool = "Bash"
+# description = "Node.js"
+# commands = ["npm install", "npm run", "npm test", "yarn build"]
+# exclude_patterns = ["&", ";", "\\|", "`", "\\$\\("]

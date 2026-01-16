@@ -15,12 +15,11 @@ audit_level = "matched"
 # DENY RULES - Checked first, block dangerous operations
 # =============================================================================
 
-# Block dangerous rm commands
+# Block push to remote - require manual approval
 [[deny]]
 tool = "Bash"
-description = "Block recursive force delete"
-commands = ["rm -rf", "rm -fr"]
-command_patterns = ["^rm\\s+.*-r.*-f", "^rm\\s+.*-f.*-r"]
+description = "Block git push"
+commands = ["git push"]
 
 # Block access to sensitive files
 [[deny]]
@@ -177,9 +176,13 @@ path_exclude_patterns = ["\\.\\.", "node_modules", "\\.git/"]
 # COMPOUND COMMANDS
 # =============================================================================
 # The key feature of this tool: compound commands like "git add -A && git commit -m msg"
-# are allowed ONLY if EVERY individual command matches an allow rule.
+# are parsed and each command is validated individually.
 #
-# Example: If you have allowed "git add" and "git commit" above, then:
-#   "git add -A && git commit -m 'message'"  -> ALLOWED (both commands allowed)
-#   "git add -A && git push"                 -> PASSTHROUGH (git push not allowed)
-#   "git add -A && rm -rf /"                 -> DENIED (rm -rf matches deny rule)
+# - ALLOW: Auto-approved, Claude proceeds without asking
+# - DENY: Blocked entirely, Claude cannot proceed, you must do it yourself
+# - PASSTHROUGH: Normal behavior, you get the standard permission prompt
+#
+# Example with the rules above:
+#   "git add -A && git commit -m 'message'"  -> ALLOW (both on allow list)
+#   "git add -A && git push"                 -> DENY (git push on deny list, blocked)
+#   "git add -A && curl example.com"         -> PASSTHROUGH (curl not in any rule, you decide)
