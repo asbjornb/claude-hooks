@@ -1,0 +1,185 @@
+# Claude Code Permissions Hook - Example Configuration
+# This file demonstrates the shell-parsing approach to permissions
+
+[audit]
+# Where to log tool use decisions
+audit_file = "/tmp/claude-permissions.json"
+
+# Audit level: "off", "matched" (default), "all"
+# - off: no auditing
+# - matched: audit only tool use that matched a rule
+# - all: audit everything including passthrough
+audit_level = "matched"
+
+# =============================================================================
+# DENY RULES - Checked first, block dangerous operations
+# =============================================================================
+
+# Block dangerous rm commands
+[[deny]]
+tool = "Bash"
+description = "Block recursive force delete"
+commands = ["rm -rf", "rm -fr"]
+command_patterns = ["^rm\\s+.*-r.*-f", "^rm\\s+.*-f.*-r"]
+
+# Block access to sensitive files
+[[deny]]
+tool = "Read"
+description = "Block reading secrets"
+path_patterns = ["\\.env$", "\\.secret$", "credentials", "password"]
+
+[[deny]]
+tool = "Write"
+description = "Block writing to secrets"
+path_patterns = ["\\.env$", "\\.secret$", "credentials"]
+
+# =============================================================================
+# ALLOW RULES - Commands that should be auto-approved
+# =============================================================================
+
+# Git commands - commonly needed
+[[allow]]
+tool = "Bash"
+description = "Git version control"
+# Using command signatures: these match regardless of additional args
+commands = [
+    "git add",
+    "git commit", 
+    "git status",
+    "git diff",
+    "git log",
+    "git branch",
+    "git checkout",
+    "git fetch",
+    "git pull",
+    "git stash",
+    "git merge",
+    "git rebase",
+    "git reset",
+    "git show",
+]
+# Block shell injection in git commands
+exclude_patterns = ["&", ";", "\\|", "`", "\\$\\("]
+
+# Note: git push is intentionally NOT included - approve manually per project
+
+# .NET development commands
+[[allow]]
+tool = "Bash"
+description = "dotnet CLI"
+commands = [
+    "dotnet build",
+    "dotnet run",
+    "dotnet test",
+    "dotnet restore",
+    "dotnet clean",
+    "dotnet add",
+    "dotnet ef",
+    "dotnet tool",
+    "dotnet publish",
+]
+exclude_patterns = ["&", ";", "\\|", "`", "\\$\\("]
+
+# Wrapper commands - timeout with various values
+[[allow]]
+tool = "Bash"
+description = "timeout wrapper commands"
+# Prefix matching means "timeout dotnet" matches "timeout 30 dotnet run"
+# and "timeout 45 dotnet run" without per-timeout rules.
+commands = [
+    "timeout dotnet",
+    "timeout npm",
+    "timeout node",
+    "timeout python",
+]
+exclude_patterns = ["&", ";", "\\|", "`", "\\$\\("]
+
+# Node.js development
+[[allow]]
+tool = "Bash"
+description = "Node.js package management"
+commands = [
+    "npm install",
+    "npm run",
+    "npm test",
+    "npm build",
+    "npm start",
+    "npm ci",
+    "yarn install",
+    "yarn run",
+    "yarn build",
+    "yarn test",
+    "pnpm install",
+    "pnpm run",
+]
+exclude_patterns = ["&", ";", "\\|", "`", "\\$\\("]
+
+# Safe read-only commands
+[[allow]]
+tool = "Bash"
+description = "Safe read-only commands"
+commands = [
+    "ls",
+    "cat",
+    "head",
+    "tail",
+    "grep",
+    "find",
+    "wc",
+    "which",
+    "pwd",
+    "echo",
+    "date",
+    "whoami",
+]
+
+# GitLab CLI commands
+[[allow]]
+tool = "Bash"
+description = "GitLab CLI"
+commands = [
+    "glab api",
+    "glab ci",
+    "glab project",
+    "glab repo",
+    "glab release",
+    "glab variable",
+    "glab issue",
+    "glab mr",
+]
+exclude_patterns = ["&", ";", "\\|", "`", "\\$\\("]
+
+# Database queries (read-only)
+[[allow]]
+tool = "Bash"
+description = "Database CLI (read-only)"
+commands = [
+    "sqlite3",
+    "psql -c",
+]
+# Exclude write operations
+exclude_patterns = ["INSERT", "UPDATE", "DELETE", "DROP", "CREATE", "ALTER", "TRUNCATE"]
+
+# File system operations in specific directories
+[[allow]]
+tool = "Read"
+description = "Read project files"
+path_patterns = ["^/mnt/c/code/", "^/home/"]
+path_exclude_patterns = ["\\.\\.", "node_modules", "\\.git/objects"]
+
+[[allow]]
+tool = "Write"
+description = "Write to project files"
+path_patterns = ["^/mnt/c/code/", "^/home/"]
+path_exclude_patterns = ["\\.\\.", "node_modules", "\\.git/"]
+
+# =============================================================================
+# COMPOUND COMMANDS
+# =============================================================================
+# The key feature of this tool: compound commands like "git add -A && git commit -m msg"
+# are allowed ONLY if EVERY individual command matches an allow rule.
+#
+# Example: If you have allowed "git add" and "git commit" above, then:
+#   "git add -A && git commit -m 'message'"  -> ALLOWED (both commands allowed)
+#   "git add -A && git push"                 -> PASSTHROUGH (git push not allowed)
+#   "git add -A && rm -rf /"                 -> DENIED (rm -rf matches deny rule)
