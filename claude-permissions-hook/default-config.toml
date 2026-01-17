@@ -5,8 +5,8 @@
 # See example.toml for more ideas.
 
 [audit]
-audit_file = ""  # Set to "/tmp/claude-permissions.log" to enable
-audit_level = "matched"  # off, matched, all
+# audit_file = "/tmp/claude-permissions.log"
+audit_level = "off"  # off, matched, all
 
 # =============================================================================
 # DENY RULES - Checked first, blocks commands entirely
@@ -39,7 +39,6 @@ commands = [
     "git stash",
     "git show",
     "git rev-parse",
-    "git remote",
     "git tag",
 ]
 exclude_patterns = ["&", ";", "\\|", "`", "\\$\\("]

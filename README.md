@@ -319,17 +319,6 @@ path_patterns = ["^/home/user/projects/"]
 path_exclude_patterns = ["\\.\\.", "node_modules"]
 ```
 
-### Legacy Regex Support
-
-For compatibility with kornysietsma's tool:
-
-```toml
-[[allow]]
-tool = "Bash"
-command_regex = "^git (add|commit|status)"
-command_exclude_regex = "&|;|\\|"
-```
-
 ## How It Works
 
 ```
@@ -363,16 +352,6 @@ command_exclude_regex = "&|;|\\|"
 │  Output: {"permissionDecision": "allow"}                    │
 └─────────────────────────────────────────────────────────────┘
 ```
-
-## Comparison with Regex Approach
-
-| Feature | Regex (korny's tool) | Shell Parsing (this tool) |
-|---------|---------------------|---------------------------|
-| `timeout 30 dotnet` vs `timeout 45 dotnet` | Need separate patterns | Single pattern: `timeout dotnet` |
-| `git add && git commit` | Complex regex | Validates each command |
-| `cmd; malicious` | Easy to miss | Parsed as separate commands |
-| `$(dangerous)` | Regex can miss | AST detects subshells |
-| Performance | Fast (compiled regex) | Fast (Go, compiled) |
 
 ## Security Notes
 

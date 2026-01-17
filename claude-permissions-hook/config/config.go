@@ -37,12 +37,6 @@ type Rule struct {
 	PathPatterns        []string `toml:"path_patterns"`         // Regex patterns for file paths
 	PathExcludePatterns []string `toml:"path_exclude_patterns"` // Patterns that should be denied
 
-	// Legacy regex support (for compatibility with korny's tool)
-	CommandRegex        string `toml:"command_regex"`
-	CommandExcludeRegex string `toml:"command_exclude_regex"`
-	FilePathRegex       string `toml:"file_path_regex"`
-	FilePathExcludeRegex string `toml:"file_path_exclude_regex"`
-
 	// Description for logging
 	Description string `toml:"description"`
 
@@ -51,10 +45,6 @@ type Rule struct {
 	compiledExcludePatterns []*regexp.Regexp
 	compiledPathPatterns    []*regexp.Regexp
 	compiledPathExclude     []*regexp.Regexp
-	compiledCmdRegex        *regexp.Regexp
-	compiledCmdExcludeRegex *regexp.Regexp
-	compiledPathRegex       *regexp.Regexp
-	compiledPathExcRegex    *regexp.Regexp
 }
 
 // Load reads and parses a TOML configuration file
@@ -91,8 +81,6 @@ func Load(path string) (*Config, error) {
 
 // compile compiles all regex patterns in the rule
 func (r *Rule) compile() error {
-	var err error
-
 	// Compile command patterns
 	for _, pattern := range r.CommandPatterns {
 		re, err := regexp.Compile(pattern)
@@ -129,32 +117,6 @@ func (r *Rule) compile() error {
 		r.compiledPathExclude = append(r.compiledPathExclude, re)
 	}
 
-	// Legacy regex support
-	if r.CommandRegex != "" {
-		r.compiledCmdRegex, err = regexp.Compile(r.CommandRegex)
-		if err != nil {
-			return fmt.Errorf("invalid command_regex %q: %w", r.CommandRegex, err)
-		}
-	}
-	if r.CommandExcludeRegex != "" {
-		r.compiledCmdExcludeRegex, err = regexp.Compile(r.CommandExcludeRegex)
-		if err != nil {
-			return fmt.Errorf("invalid command_exclude_regex %q: %w", r.CommandExcludeRegex, err)
-		}
-	}
-	if r.FilePathRegex != "" {
-		r.compiledPathRegex, err = regexp.Compile(r.FilePathRegex)
-		if err != nil {
-			return fmt.Errorf("invalid file_path_regex %q: %w", r.FilePathRegex, err)
-		}
-	}
-	if r.FilePathExcludeRegex != "" {
-		r.compiledPathExcRegex, err = regexp.Compile(r.FilePathExcludeRegex)
-		if err != nil {
-			return fmt.Errorf("invalid file_path_exclude_regex %q: %w", r.FilePathExcludeRegex, err)
-		}
-	}
-
 	return nil
 }
 
@@ -176,24 +138,4 @@ func (r *Rule) GetCompiledPathPatterns() []*regexp.Regexp {
 // GetCompiledPathExclude returns compiled path exclude patterns
 func (r *Rule) GetCompiledPathExclude() []*regexp.Regexp {
 	return r.compiledPathExclude
-}
-
-// GetCompiledCmdRegex returns the compiled legacy command regex
-func (r *Rule) GetCompiledCmdRegex() *regexp.Regexp {
-	return r.compiledCmdRegex
-}
-
-// GetCompiledCmdExcludeRegex returns the compiled legacy command exclude regex
-func (r *Rule) GetCompiledCmdExcludeRegex() *regexp.Regexp {
-	return r.compiledCmdExcludeRegex
-}
-
-// GetCompiledPathRegex returns the compiled legacy path regex
-func (r *Rule) GetCompiledPathRegex() *regexp.Regexp {
-	return r.compiledPathRegex
-}
-
-// GetCompiledPathExcRegex returns the compiled legacy path exclude regex
-func (r *Rule) GetCompiledPathExcRegex() *regexp.Regexp {
-	return r.compiledPathExcRegex
 }

@@ -151,18 +151,6 @@ func (m *Matcher) checkSingleCommand(cmd parser.ParsedCommand) MatchResult {
 				}
 			}
 		}
-
-		// Legacy regex support
-		if re := rule.GetCompiledCmdRegex(); re != nil && re.MatchString(cmd.Raw) {
-			if excl := rule.GetCompiledCmdExcludeRegex(); excl != nil && excl.MatchString(cmd.Raw) {
-				continue
-			}
-			return MatchResult{
-				Decision:    DecisionAllow,
-				Reason:      "Command matches allowed regex",
-				MatchedRule: rule.Description,
-			}
-		}
 	}
 
 	return MatchResult{
@@ -229,15 +217,6 @@ func (m *Matcher) matchBashRule(rule config.Rule, fullCmd string, stmt *parser.S
 		}
 	}
 
-	// Check legacy regex
-	if re := rule.GetCompiledCmdRegex(); re != nil && re.MatchString(fullCmd) {
-		// If there's an exclude regex, check it
-		if excl := rule.GetCompiledCmdExcludeRegex(); excl != nil {
-			return !excl.MatchString(fullCmd)
-		}
-		return true
-	}
-
 	// Check command signatures against deny list
 	for _, cmd := range stmt.Commands {
 		sig := parser.CommandSignature(cmd)
@@ -269,23 +248,6 @@ func (m *Matcher) MatchFilePath(toolName, filePath string) MatchResult {
 				}
 			}
 		}
-
-		// Legacy regex
-		if re := rule.GetCompiledPathRegex(); re != nil && re.MatchString(filePath) {
-			if excl := rule.GetCompiledPathExcRegex(); excl != nil && !excl.MatchString(filePath) {
-				return MatchResult{
-					Decision:    DecisionDeny,
-					Reason:      "Path matched deny regex",
-					MatchedRule: rule.Description,
-				}
-			} else if excl == nil {
-				return MatchResult{
-					Decision:    DecisionDeny,
-					Reason:      "Path matched deny regex",
-					MatchedRule: rule.Description,
-				}
-			}
-		}
 	}
 
 	// Check allow rules
@@ -312,18 +274,6 @@ func (m *Matcher) MatchFilePath(toolName, filePath string) MatchResult {
 						MatchedRule: rule.Description,
 					}
 				}
-			}
-		}
-
-		// Legacy regex
-		if re := rule.GetCompiledPathRegex(); re != nil && re.MatchString(filePath) {
-			if excl := rule.GetCompiledPathExcRegex(); excl != nil && excl.MatchString(filePath) {
-				continue
-			}
-			return MatchResult{
-				Decision:    DecisionAllow,
-				Reason:      "Path matched allow regex",
-				MatchedRule: rule.Description,
 			}
 		}
 	}
