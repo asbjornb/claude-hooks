@@ -66,12 +66,12 @@ func Load(path string) (*Config, error) {
 
 	// Compile patterns
 	for i := range cfg.Allow {
-		if err := cfg.Allow[i].compile(); err != nil {
+		if err := cfg.Allow[i].Compile(); err != nil {
 			return nil, fmt.Errorf("error compiling allow rule %d: %w", i, err)
 		}
 	}
 	for i := range cfg.Deny {
-		if err := cfg.Deny[i].compile(); err != nil {
+		if err := cfg.Deny[i].Compile(); err != nil {
 			return nil, fmt.Errorf("error compiling deny rule %d: %w", i, err)
 		}
 	}
@@ -79,8 +79,8 @@ func Load(path string) (*Config, error) {
 	return &cfg, nil
 }
 
-// compile compiles all regex patterns in the rule
-func (r *Rule) compile() error {
+// Compile compiles all regex patterns in the rule
+func (r *Rule) Compile() error {
 	// Compile command patterns
 	for _, pattern := range r.CommandPatterns {
 		re, err := regexp.Compile(pattern)
