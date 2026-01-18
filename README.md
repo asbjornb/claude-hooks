@@ -28,6 +28,14 @@ git add -A && git commit -m "msg"
     ✅ ALLOW (all commands pass)
 ```
 
+### Three Possible Outcomes
+
+For every command, the hook returns one of:
+
+- **ALLOW** – Command is auto-approved and runs immediately
+- **DENY** – Command is blocked entirely (Claude cannot proceed)
+- **PASSTHROUGH** – Claude asks *you* for approval, as usual
+
 ## Quickstart (2 minutes)
 
 ```bash
@@ -144,15 +152,6 @@ commands = ["git push"]
 ```
 
 With this rule, Claude will never push for you. You stay in control of what goes to the remote.
-
-### 5. Session Allowlist Analysis
-
-Import your existing Claude Code session allowlists to generate suggested patterns:
-
-```bash
-# Extract your session permissions (usually at .claude/settings.local.json)
-claude-permissions-hook analyze --allowlist .claude/settings.local.json --format toml
-```
 
 ## Installation
 
@@ -351,6 +350,14 @@ path_exclude_patterns = ["\\.\\.", "node_modules"]
 ┌─────────────────────────────────────────────────────────────┐
 │  Output: {"permissionDecision": "allow"}                    │
 └─────────────────────────────────────────────────────────────┘
+```
+
+## Importing Existing Session Permissions
+
+If you've already been approving commands in Claude Code, you can analyze your session allowlist to generate config suggestions:
+
+```bash
+claude-permissions-hook analyze --allowlist .claude/settings.local.json --format toml
 ```
 
 ## Security Notes
