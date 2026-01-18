@@ -102,7 +102,7 @@ func initCmd(args []string) {
 	fmt.Printf("✅ Created %s\n\n", configPath)
 	fmt.Println("Next step: Run /hooks in Claude Code and add a PreToolUse hook:")
 	fmt.Println()
-	fmt.Println("  Matcher: Bash")
+	fmt.Println("  Matcher: Bash|Read|Write|Edit")
 	fmt.Printf("  Command: claude-permissions-hook run --config %s\n", configPath)
 	fmt.Println()
 	fmt.Println("Edit the config to customize which commands are allowed/denied.")

@@ -39,18 +39,21 @@ For every command, the hook returns one of:
 ## Quickstart (2 minutes)
 
 ```bash
-# 1. Install
+# 1. Install (requires Go 1.22+)
 go install github.com/asbjornb/claude-hooks/claude-permissions-hook@latest
 
 # 2. Initialize config (generates ~/.config/claude-permissions.toml)
 claude-permissions-hook init
 
-# 3. Open Claude Code, run /hooks, and add:
-#    Matcher: Bash
+# 3. Open Claude Code, run /hooks, and add a PreToolUse hook:
+#    Matcher: Bash|Read|Write|Edit
 #    Command: claude-permissions-hook run --config ~/.config/claude-permissions.toml
+
+# 4. (Optional) Edit the config to add rules for your stack
+code ~/.config/claude-permissions.toml
 ```
 
-That's it. Your hook is now parsing shell commands instead of playing regex whack-a-mole.
+**Building from source?** Use `go build .` then `./claude-permissions-hook init`.
 
 The [default config](claude-permissions-hook/default-config.toml) allows safe git commands (no history manipulation). See [example.toml](example.toml) for a more complete configuration with dotnet, npm, and other stacks.
 
