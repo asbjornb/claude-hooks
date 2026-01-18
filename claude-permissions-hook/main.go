@@ -384,15 +384,17 @@ func printTOMLSuggestions(groups []CommandGroup) {
 	}
 
 	for cmd, cmdGroups := range byCommand {
-		fmt.Printf("# %s commands (%d patterns)\n", cmd, len(cmdGroups))
+		// Count total matches across all patterns
+		totalMatches := 0
+		var cmds []string
+		for _, g := range cmdGroups {
+			totalMatches += g.Count
+			cmds = append(cmds, g.Pattern)
+		}
+		fmt.Printf("# %s commands (matched %d times)\n", cmd, totalMatches)
 		fmt.Println("[[allow]]")
 		fmt.Println("tool = \"Bash\"")
 		fmt.Printf("description = \"%s commands\"\n", cmd)
-
-		var cmds []string
-		for _, g := range cmdGroups {
-			cmds = append(cmds, g.Pattern)
-		}
 		fmt.Printf("commands = %s\n", toTOMLArray(cmds))
 		fmt.Println("exclude_patterns = [\"&\", \";\", \"\\\\|\", \"`\", \"\\\\$\\\\(\"]")
 		fmt.Println()
