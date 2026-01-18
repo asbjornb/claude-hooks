@@ -394,7 +394,7 @@ func printTOMLSuggestions(groups []CommandGroup) {
 			cmds = append(cmds, g.Pattern)
 		}
 		fmt.Printf("commands = %s\n", toTOMLArray(cmds))
-		fmt.Println("exclude_patterns = [\"&|;|\\\\||`|\\\\$\\\\(\"]  # Block shell injection")
+		fmt.Println("exclude_patterns = [\"&\", \";\", \"\\\\|\", \"`\", \"\\\\$\\\\(\"]")
 		fmt.Println()
 	}
 }
