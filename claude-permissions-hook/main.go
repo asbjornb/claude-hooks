@@ -82,24 +82,22 @@ func initCmd(args []string) {
 
 	// Check if config already exists
 	if _, err := os.Stat(configPath); err == nil {
-		fmt.Printf("Config already exists at %s\n", configPath)
-		fmt.Println("Delete it first if you want to regenerate.")
-		os.Exit(1)
-	}
+		fmt.Printf("Config already exists at %s\n\n", configPath)
+	} else {
+		// Ensure .config directory exists
+		if err := os.MkdirAll(configDir, 0755); err != nil {
+			fmt.Fprintf(os.Stderr, "Error creating config directory: %v\n", err)
+			os.Exit(1)
+		}
 
-	// Ensure .config directory exists
-	if err := os.MkdirAll(configDir, 0755); err != nil {
-		fmt.Fprintf(os.Stderr, "Error creating config directory: %v\n", err)
-		os.Exit(1)
-	}
+		// Write default config
+		if err := os.WriteFile(configPath, []byte(defaultConfig), 0644); err != nil {
+			fmt.Fprintf(os.Stderr, "Error writing config: %v\n", err)
+			os.Exit(1)
+		}
 
-	// Write default config
-	if err := os.WriteFile(configPath, []byte(defaultConfig), 0644); err != nil {
-		fmt.Fprintf(os.Stderr, "Error writing config: %v\n", err)
-		os.Exit(1)
+		fmt.Printf("✅ Created %s\n\n", configPath)
 	}
-
-	fmt.Printf("✅ Created %s\n\n", configPath)
 	fmt.Println("Next step: Run /hooks in Claude Code and add a PreToolUse hook:")
 	fmt.Println()
 	fmt.Println("  Matcher: Bash|Read|Write|Edit")
