@@ -6,6 +6,10 @@ import (
 	"github.com/asbjornb/claude-hooks/claude-permissions-hook/config"
 )
 
+func boolPtr(v bool) *bool {
+	return &v
+}
+
 func TestTimeoutDotnetPattern(t *testing.T) {
 	// This is the key use case: one pattern should match all timeout variations
 	cfg := &config.Config{
@@ -201,5 +205,26 @@ func TestWrapperAllow(t *testing.T) {
 					tt.command, result.Decision, tt.want, result.Reason)
 			}
 		})
+	}
+}
+
+func TestBashConfigBlocksSubshells(t *testing.T) {
+	cfg := &config.Config{
+		Bash: &config.BashConfig{
+			AllowSubshells: boolPtr(false),
+		},
+		Allow: []config.Rule{
+			{
+				Tool:        "Bash",
+				Commands:    []string{"echo"},
+				Description: "Echo",
+			},
+		},
+	}
+
+	m := New(cfg)
+	result := m.MatchBashCommand("echo $(whoami)")
+	if result.Decision != DecisionPassthrough {
+		t.Errorf("Expected PASSTHROUGH for subshell command, got %v", result.Decision)
 	}
 }

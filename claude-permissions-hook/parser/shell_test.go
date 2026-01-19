@@ -233,6 +233,7 @@ func TestDetectDangerousConstructs(t *testing.T) {
 		wantSubshell   bool
 		wantPipe       bool
 		wantBackground bool
+		wantRedirect   bool
 	}{
 		{
 			name:         "subshell",
@@ -248,6 +249,11 @@ func TestDetectDangerousConstructs(t *testing.T) {
 			name:           "background",
 			input:          "sleep 10 &",
 			wantBackground: true,
+		},
+		{
+			name:         "redirect",
+			input:        "echo hi > out.txt",
+			wantRedirect: true,
 		},
 		{
 			name:  "safe command",
@@ -270,6 +276,9 @@ func TestDetectDangerousConstructs(t *testing.T) {
 			}
 			if stmt.HasBackground != tt.wantBackground {
 				t.Errorf("HasBackground = %v, want %v", stmt.HasBackground, tt.wantBackground)
+			}
+			if stmt.HasRedirect != tt.wantRedirect {
+				t.Errorf("HasRedirect = %v, want %v", stmt.HasRedirect, tt.wantRedirect)
 			}
 		})
 	}

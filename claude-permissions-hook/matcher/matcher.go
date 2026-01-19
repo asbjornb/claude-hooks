@@ -27,13 +27,17 @@ type MatchResult struct {
 
 // Matcher holds compiled configuration and provides matching methods
 type Matcher struct {
-	cfg *config.Config
+	cfg     *config.Config
+	bashCfg config.BashConfigResolved
 }
 
 // New creates a new Matcher with the given configuration
 func New(cfg *config.Config) *Matcher {
 	parser.SetSubcommandTools(cfg.SubcommandTools)
-	return &Matcher{cfg: cfg}
+	return &Matcher{
+		cfg:     cfg,
+		bashCfg: cfg.GetBashConfig(),
+	}
 }
 
 // MatchBashCommand checks a bash command against all rules
@@ -46,6 +50,37 @@ func (m *Matcher) MatchBashCommand(command string) MatchResult {
 			Decision: DecisionPassthrough,
 			Reason:   "Failed to parse command",
 			Details:  err.Error(),
+		}
+	}
+
+	if !m.bashCfg.AllowPipes && stmt.HasPipe {
+		return MatchResult{
+			Decision: DecisionPassthrough,
+			Reason:   "Pipes are not allowed by config",
+		}
+	}
+	if !m.bashCfg.AllowSubshells && stmt.HasSubshell {
+		return MatchResult{
+			Decision: DecisionPassthrough,
+			Reason:   "Subshells are not allowed by config",
+		}
+	}
+	if !m.bashCfg.AllowBackground && stmt.HasBackground {
+		return MatchResult{
+			Decision: DecisionPassthrough,
+			Reason:   "Background commands are not allowed by config",
+		}
+	}
+	if !m.bashCfg.AllowRedirects && stmt.HasRedirect {
+		return MatchResult{
+			Decision: DecisionPassthrough,
+			Reason:   "Redirects are not allowed by config",
+		}
+	}
+	if !m.bashCfg.AllowProcessSubstitution && stmt.HasProcessSubst {
+		return MatchResult{
+			Decision: DecisionPassthrough,
+			Reason:   "Process substitution is not allowed by config",
 		}
 	}
 

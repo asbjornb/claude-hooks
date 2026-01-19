@@ -11,6 +11,15 @@ audit_file = "/tmp/claude-permissions.json"
 # - all: audit everything including passthrough
 audit_level = "matched"
 
+# Shell constructs (default: true if omitted)
+[bash]
+# Pipes and redirects are common, but can be risky if overused. Toggle to require approval.
+allow_pipes = true
+allow_redirects = true
+allow_background = true
+allow_subshells = true
+allow_process_substitution = true
+
 # Optional: override which tools treat the first non-flag arg as a subcommand.
 # subcommand_tools = ["git", "dotnet", "npm", "go", "helm"]
 

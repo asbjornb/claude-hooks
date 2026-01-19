@@ -15,6 +15,7 @@ type Config struct {
 	Allow           []Rule      `toml:"allow"`
 	Deny            []Rule      `toml:"deny"`
 	SubcommandTools []string    `toml:"subcommand_tools"`
+	Bash            *BashConfig `toml:"bash"`
 }
 
 // AuditConfig controls logging behavior
@@ -43,6 +44,51 @@ type Rule struct {
 	compiledCommandPatterns []*regexp.Regexp
 	compiledPathPatterns    []*regexp.Regexp
 	compiledPathExclude     []*regexp.Regexp
+}
+
+// BashConfig controls shell construct handling.
+type BashConfig struct {
+	AllowPipes               *bool `toml:"allow_pipes"`
+	AllowSubshells           *bool `toml:"allow_subshells"`
+	AllowBackground          *bool `toml:"allow_background"`
+	AllowRedirects           *bool `toml:"allow_redirects"`
+	AllowProcessSubstitution *bool `toml:"allow_process_substitution"`
+}
+
+// BashConfigResolved is the resolved config with defaults applied.
+type BashConfigResolved struct {
+	AllowPipes               bool
+	AllowSubshells           bool
+	AllowBackground          bool
+	AllowRedirects           bool
+	AllowProcessSubstitution bool
+}
+
+// GetBashConfig resolves bash config with defaults.
+func (c *Config) GetBashConfig() BashConfigResolved {
+	if c.Bash == nil {
+		return BashConfigResolved{
+			AllowPipes:               true,
+			AllowSubshells:           true,
+			AllowBackground:          true,
+			AllowRedirects:           true,
+			AllowProcessSubstitution: true,
+		}
+	}
+	return BashConfigResolved{
+		AllowPipes:               boolOrDefault(c.Bash.AllowPipes, true),
+		AllowSubshells:           boolOrDefault(c.Bash.AllowSubshells, true),
+		AllowBackground:          boolOrDefault(c.Bash.AllowBackground, true),
+		AllowRedirects:           boolOrDefault(c.Bash.AllowRedirects, true),
+		AllowProcessSubstitution: boolOrDefault(c.Bash.AllowProcessSubstitution, true),
+	}
+}
+
+func boolOrDefault(value *bool, def bool) bool {
+	if value == nil {
+		return def
+	}
+	return *value
 }
 
 // Load reads and parses a TOML configuration file

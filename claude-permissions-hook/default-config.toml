@@ -8,6 +8,15 @@
 # audit_file = "/tmp/claude-permissions.log"
 audit_level = "off"  # off, matched, all
 
+[bash]
+# Shell constructs are allowed by default to match current Claude behavior.
+# Set any to false if you want to require manual approval.
+allow_pipes = true
+allow_subshells = true
+allow_background = true
+allow_redirects = true
+allow_process_substitution = true
+
 # =============================================================================
 # DENY RULES - Checked first, blocks commands entirely
 # =============================================================================

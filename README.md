@@ -205,6 +205,22 @@ You can override that list if you need support for additional tools:
 subcommand_tools = ["git", "dotnet", "npm", "go", "helm"]
 ```
 
+### Shell Constructs
+
+Shell features like pipes, redirects, subshells, and background jobs can be handy, but also change the risk profile.
+You can control whether these constructs are auto-approved:
+
+```toml
+[bash]
+allow_pipes = true
+allow_redirects = true
+allow_background = true
+allow_subshells = true
+allow_process_substitution = true
+```
+
+If any of these are set to `false`, commands that use them will fall back to normal permission prompts.
+
 ## Claude Code Setup
 
 Run `/hooks` in Claude Code and add a PreToolUse hook with:
@@ -365,10 +381,10 @@ claude-permissions-hook analyze --allowlist .claude/settings.local.json --format
 
 ## Security Notes
 
-1. **Subshell detection**: The parser flags `$(...)` and `` `...` `` constructs
-2. **Deny first**: Deny rules are checked before allow rules
-3. **Compound safety**: All commands in `&&`/`||`/`;` must be allowed
-4. **Pipes and expansions**: Pipes and substitutions are parsed into individual commands, but data exfiltration is still possible; keeping `curl`/`wget`/`scp` manual helps.
+1. **Deny first**: Deny rules are checked before allow rules
+2. **Compound safety**: All commands in `&&`/`||`/`;` must be allowed
+3. **Shell constructs**: Pipes, redirects, subshells, background jobs, and process substitution can be gated via the `[bash]` config
+4. **Data exfiltration**: Even with parsing, allowing network tools (`curl`, `wget`, `scp`) increases risk
 
 ## License
 

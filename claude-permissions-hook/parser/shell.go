@@ -31,6 +31,10 @@ type ShellStatement struct {
 	HasBackground bool
 	// HasSubshell indicates if statement contains subshell $(...)
 	HasSubshell bool
+	// HasRedirect indicates if statement contains redirects (>, >>, <, etc)
+	HasRedirect bool
+	// HasProcessSubst indicates if statement contains process substitution <(...)
+	HasProcessSubst bool
 }
 
 // ParseShellCommand parses a shell command string and extracts all individual commands
@@ -68,6 +72,12 @@ func ParseShellCommand(command string) (*ShellStatement, error) {
 			}
 		case *syntax.CmdSubst:
 			stmt.HasSubshell = true
+		case *syntax.Subshell:
+			stmt.HasSubshell = true
+		case *syntax.Redirect:
+			stmt.HasRedirect = true
+		case *syntax.ProcSubst:
+			stmt.HasProcessSubst = true
 		}
 		return true
 	})
