@@ -91,9 +91,11 @@ func WriteDeny(reason string) error {
 	})
 }
 
-// WritePassthrough outputs nothing (passthrough to Claude's normal permissions)
+// WritePassthrough outputs an "ask" decision (passthrough to Claude's normal permissions)
 func WritePassthrough() {
-	// No output = passthrough
+	WriteOutput(&HookOutput{
+		PermissionDecision: "ask",
+	})
 }
 
 // GetBashCommand extracts the command from Bash tool input
