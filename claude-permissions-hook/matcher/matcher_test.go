@@ -129,3 +129,76 @@ func TestDenyTakesPrecedence(t *testing.T) {
 		t.Errorf("Expected ALLOW for 'git status', got %v", result.Decision)
 	}
 }
+
+func TestPipeComposition(t *testing.T) {
+	cfg := &config.Config{
+		Deny: []config.Rule{
+			{
+				Tool:        "Bash",
+				Commands:    []string{"grep"},
+				Description: "Block grep",
+			},
+		},
+		Allow: []config.Rule{
+			{
+				Tool:        "Bash",
+				Commands:    []string{"cat", "grep"},
+				Description: "Text tools",
+			},
+		},
+	}
+
+	m := New(cfg)
+
+	tests := []struct {
+		command string
+		want    Decision
+	}{
+		{"cat file | grep pattern", DecisionDeny},
+		{"cat file | wc", DecisionPassthrough},
+		{"cat file | cat", DecisionAllow},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.command, func(t *testing.T) {
+			result := m.MatchBashCommand(tt.command)
+			if result.Decision != tt.want {
+				t.Errorf("MatchBashCommand(%q) = %v, want %v (reason: %s)",
+					tt.command, result.Decision, tt.want, result.Reason)
+			}
+		})
+	}
+}
+
+func TestWrapperAllow(t *testing.T) {
+	cfg := &config.Config{
+		Allow: []config.Rule{
+			{
+				Tool:        "Bash",
+				Commands:    []string{"env npm run", "sudo git status"},
+				Description: "Wrapper commands",
+			},
+		},
+	}
+
+	m := New(cfg)
+
+	tests := []struct {
+		command string
+		want    Decision
+	}{
+		{"env FOO=bar npm run build", DecisionAllow},
+		{"sudo -u root git status", DecisionAllow},
+		{"sudo git commit -m 'x'", DecisionPassthrough},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.command, func(t *testing.T) {
+			result := m.MatchBashCommand(tt.command)
+			if result.Decision != tt.want {
+				t.Errorf("MatchBashCommand(%q) = %v, want %v (reason: %s)",
+					tt.command, result.Decision, tt.want, result.Reason)
+			}
+		})
+	}
+}

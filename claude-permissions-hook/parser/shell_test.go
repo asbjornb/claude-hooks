@@ -179,6 +179,48 @@ func TestParseTimeoutWrapper(t *testing.T) {
 	}
 }
 
+func TestParseWrapperCommands(t *testing.T) {
+	tests := []struct {
+		name    string
+		input   string
+		wantSig string
+	}{
+		{
+			name:    "env assignment",
+			input:   "env FOO=bar npm run build",
+			wantSig: "env npm run",
+		},
+		{
+			name:    "sudo with subcommand",
+			input:   "sudo -u root git status",
+			wantSig: "sudo git status",
+		},
+		{
+			name:    "env without assignment",
+			input:   "env npm test",
+			wantSig: "env npm test",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			stmt, err := ParseShellCommand(tt.input)
+			if err != nil {
+				t.Fatalf("ParseShellCommand() error = %v", err)
+			}
+
+			if len(stmt.Commands) != 1 {
+				t.Fatalf("expected 1 command, got %d", len(stmt.Commands))
+			}
+
+			sig := CommandSignature(stmt.Commands[0])
+			if sig != tt.wantSig {
+				t.Errorf("signature = %q, want %q", sig, tt.wantSig)
+			}
+		})
+	}
+}
+
 func TestDetectDangerousConstructs(t *testing.T) {
 	tests := []struct {
 		name           string

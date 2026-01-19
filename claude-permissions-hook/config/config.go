@@ -14,7 +14,6 @@ type Config struct {
 	Audit  AuditConfig  `toml:"audit"`
 	Allow  []Rule       `toml:"allow"`
 	Deny   []Rule       `toml:"deny"`
-	Import []string     `toml:"import"` // Import session allowlists
 }
 
 // AuditConfig controls logging behavior
