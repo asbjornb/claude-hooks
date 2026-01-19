@@ -219,6 +219,9 @@ allow_subshells = true
 allow_process_substitution = true
 ```
 
+The default config ships with `allow_subshells = false` and `allow_process_substitution = false` for a safer baseline.
+Set them to `true` if you prefer a more permissive setup.
+
 If any of these are set to `false`, commands that use them will fall back to normal permission prompts.
 
 ## Claude Code Setup
