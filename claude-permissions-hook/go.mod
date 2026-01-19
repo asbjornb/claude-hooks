@@ -1,4 +1,4 @@
-module github.com/user/claude-permissions-hook
+module github.com/asbjornb/claude-hooks/claude-permissions-hook
 
 go 1.22
 

@@ -10,10 +10,10 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/user/claude-permissions-hook/config"
-	"github.com/user/claude-permissions-hook/hook"
-	"github.com/user/claude-permissions-hook/matcher"
-	"github.com/user/claude-permissions-hook/parser"
+	"github.com/asbjornb/claude-hooks/claude-permissions-hook/config"
+	"github.com/asbjornb/claude-hooks/claude-permissions-hook/hook"
+	"github.com/asbjornb/claude-hooks/claude-permissions-hook/matcher"
+	"github.com/asbjornb/claude-hooks/claude-permissions-hook/parser"
 )
 
 //go:embed default-config.toml
@@ -394,7 +394,6 @@ func printTOMLSuggestions(groups []CommandGroup) {
 		fmt.Println("tool = \"Bash\"")
 		fmt.Printf("description = \"%s commands\"\n", cmd)
 		fmt.Printf("commands = %s\n", toTOMLArray(cmds))
-		fmt.Println("exclude_patterns = [\"&\", \";\", \"\\\\|\", \"`\", \"\\\\$\\\\(\"]")
 		fmt.Println()
 	}
 }

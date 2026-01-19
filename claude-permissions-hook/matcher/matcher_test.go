@@ -3,7 +3,7 @@ package matcher
 import (
 	"testing"
 
-	"github.com/user/claude-permissions-hook/config"
+	"github.com/asbjornb/claude-hooks/claude-permissions-hook/config"
 )
 
 func TestTimeoutDotnetPattern(t *testing.T) {
@@ -92,44 +92,6 @@ func TestGitCommitFlow(t *testing.T) {
 			if result.Decision != tt.want {
 				t.Errorf("MatchBashCommand(%q) = %v, want %v (reason: %s)",
 					tt.command, result.Decision, tt.want, result.Reason)
-			}
-		})
-	}
-}
-
-func TestExcludePatterns(t *testing.T) {
-	cfg := &config.Config{
-		Allow: []config.Rule{
-			{
-				Tool:            "Bash",
-				Commands:        []string{"git add", "git commit"},
-				ExcludePatterns: []string{";", "&", "\\|", "`"},
-				Description:     "Git with exclusions",
-			},
-		},
-	}
-
-	// Need to compile the patterns
-	for i := range cfg.Allow {
-		cfg.Allow[i].Compile()
-	}
-
-	m := New(cfg)
-
-	tests := []struct {
-		command string
-		want    Decision
-	}{
-		{"git add -A", DecisionAllow},
-		{"git add -A; rm -rf /", DecisionPassthrough}, // semicolon excluded
-		{"git add -A & echo x", DecisionPassthrough},  // ampersand excluded
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.command, func(t *testing.T) {
-			result := m.MatchBashCommand(tt.command)
-			if result.Decision != tt.want {
-				t.Errorf("MatchBashCommand(%q) = %v, want %v", tt.command, result.Decision, tt.want)
 			}
 		})
 	}

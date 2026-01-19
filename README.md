@@ -73,7 +73,6 @@ commands = ["git push"]
 tool = "Bash"
 description = "Git commit workflow"
 commands = ["git add", "git commit", "git status", "git diff", "git log"]
-exclude_patterns = ["&", ";", "\\|", "`", "\\$\\("]
 ```
 
 Now `git add -A && git commit -m "fix typo"` just works. Push stays in your hands.
@@ -87,7 +86,6 @@ Stop approving every timeout variation:
 tool = "Bash"
 description = "dotnet with timeout wrapper"
 commands = ["timeout dotnet", "dotnet build", "dotnet run", "dotnet test"]
-exclude_patterns = ["&", ";", "\\|", "`", "\\$\\("]
 ```
 
 The prefix `timeout dotnet` matches `timeout 30 dotnet run`, `timeout 120 dotnet test`, etc.
@@ -99,7 +97,6 @@ The prefix `timeout dotnet` matches `timeout 30 dotnet run`, `timeout 120 dotnet
 tool = "Bash"
 description = "Node.js tooling"
 commands = ["npm install", "npm run", "npm test", "yarn build", "pnpm run"]
-exclude_patterns = ["&", ";", "\\|", "`", "\\$\\("]
 ```
 
 ## Key Features
@@ -192,13 +189,11 @@ commands = ["git push"]
 tool = "Bash"
 description = "Git commands"
 commands = ["git add", "git commit", "git status", "git diff"]
-exclude_patterns = ["&", ";", "\\|", "`"]  # Block shell injection
 
 [[allow]]
 tool = "Bash"
 description = "dotnet with timeout"
 commands = ["timeout dotnet", "dotnet build", "dotnet run", "dotnet test"]
-exclude_patterns = ["&", ";", "\\|", "`"]
 ```
 
 ## Claude Code Setup
@@ -305,9 +300,6 @@ commands = ["git add", "git commit"]
 # Regex patterns (when needed)
 command_patterns = ["^npm run \\w+$"]
 
-# Exclude patterns - deny even if command matches
-exclude_patterns = ["&", ";", "\\|", "`", "\\$\\("]
-
 # Description for logging
 description = "Git commands"
 ```
@@ -342,7 +334,6 @@ path_exclude_patterns = ["\\.\\.", "node_modules"]
 │  3. For each parsed command:                                │
 │     a. Extract signature: "git add", "git commit"           │
 │     b. Check against ALLOW rules                            │
-│     c. Verify no exclude patterns match                     │
 │                                                              │
 │  4. If ALL commands allowed → ALLOW                         │
 │     If ANY command denied  → DENY                           │
@@ -366,9 +357,8 @@ claude-permissions-hook analyze --allowlist .claude/settings.local.json --format
 ## Security Notes
 
 1. **Subshell detection**: The parser flags `$(...)` and `` `...` `` constructs
-2. **Exclude patterns**: Always use exclude patterns to block shell injection
-3. **Deny first**: Deny rules are checked before allow rules
-4. **Compound safety**: All commands in `&&`/`||`/`;` must be allowed
+2. **Deny first**: Deny rules are checked before allow rules
+3. **Compound safety**: All commands in `&&`/`||`/`;` must be allowed
 
 ## License
 

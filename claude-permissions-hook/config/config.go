@@ -31,7 +31,6 @@ type Rule struct {
 	// For Bash commands - command matching
 	Commands        []string `toml:"commands"`         // List of allowed command signatures (e.g., ["git add", "git commit"])
 	CommandPatterns []string `toml:"command_patterns"` // Regex patterns for commands
-	ExcludePatterns []string `toml:"exclude_patterns"` // Patterns that should be denied even if command matches
 
 	// For file operations - path matching
 	PathPatterns        []string `toml:"path_patterns"`         // Regex patterns for file paths
@@ -42,7 +41,6 @@ type Rule struct {
 
 	// Compiled patterns (internal use)
 	compiledCommandPatterns []*regexp.Regexp
-	compiledExcludePatterns []*regexp.Regexp
 	compiledPathPatterns    []*regexp.Regexp
 	compiledPathExclude     []*regexp.Regexp
 }
@@ -90,15 +88,6 @@ func (r *Rule) Compile() error {
 		r.compiledCommandPatterns = append(r.compiledCommandPatterns, re)
 	}
 
-	// Compile exclude patterns
-	for _, pattern := range r.ExcludePatterns {
-		re, err := regexp.Compile(pattern)
-		if err != nil {
-			return fmt.Errorf("invalid exclude pattern %q: %w", pattern, err)
-		}
-		r.compiledExcludePatterns = append(r.compiledExcludePatterns, re)
-	}
-
 	// Compile path patterns
 	for _, pattern := range r.PathPatterns {
 		re, err := regexp.Compile(pattern)
@@ -123,11 +112,6 @@ func (r *Rule) Compile() error {
 // GetCompiledCommandPatterns returns compiled command patterns
 func (r *Rule) GetCompiledCommandPatterns() []*regexp.Regexp {
 	return r.compiledCommandPatterns
-}
-
-// GetCompiledExcludePatterns returns compiled exclude patterns
-func (r *Rule) GetCompiledExcludePatterns() []*regexp.Regexp {
-	return r.compiledExcludePatterns
 }
 
 // GetCompiledPathPatterns returns compiled path patterns

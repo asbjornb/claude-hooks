@@ -4,8 +4,8 @@ package matcher
 import (
 	"strings"
 
-	"github.com/user/claude-permissions-hook/config"
-	"github.com/user/claude-permissions-hook/parser"
+	"github.com/asbjornb/claude-hooks/claude-permissions-hook/config"
+	"github.com/asbjornb/claude-hooks/claude-permissions-hook/parser"
 )
 
 // Decision represents the result of matching a command against rules
@@ -45,26 +45,6 @@ func (m *Matcher) MatchBashCommand(command string) MatchResult {
 			Decision: DecisionPassthrough,
 			Reason:   "Failed to parse command",
 			Details:  err.Error(),
-		}
-	}
-
-	// Check for dangerous constructs first
-	if stmt.HasSubshell {
-		// Check if any deny rule explicitly blocks subshells
-		for _, rule := range m.cfg.Deny {
-			if rule.Tool != "Bash" {
-				continue
-			}
-			for _, excl := range rule.GetCompiledExcludePatterns() {
-				if excl.MatchString(command) {
-					return MatchResult{
-						Decision:    DecisionDeny,
-						Reason:      "Command contains denied pattern",
-						MatchedRule: rule.Description,
-						Details:     "Subshell detected and matched exclude pattern",
-					}
-				}
-			}
 		}
 	}
 
@@ -124,10 +104,6 @@ func (m *Matcher) checkSingleCommand(cmd parser.ParsedCommand) MatchResult {
 		// Check explicit command list first (most specific)
 		for _, allowedCmd := range rule.Commands {
 			if matchCommandSignature(allowedCmd, sig, cmd) {
-				// Check exclude patterns
-				if m.matchesExcludePatterns(rule, cmd.Raw) {
-					continue // Skip this rule, try next
-				}
 				return MatchResult{
 					Decision:    DecisionAllow,
 					Reason:      "Command matches allowed signature",
@@ -140,10 +116,6 @@ func (m *Matcher) checkSingleCommand(cmd parser.ParsedCommand) MatchResult {
 		// Check regex patterns
 		for _, re := range rule.GetCompiledCommandPatterns() {
 			if re.MatchString(cmd.Raw) {
-				// Check exclude patterns
-				if m.matchesExcludePatterns(rule, cmd.Raw) {
-					continue
-				}
 				return MatchResult{
 					Decision:    DecisionAllow,
 					Reason:      "Command matches allowed pattern",
@@ -195,16 +167,6 @@ func matchCommandSignature(pattern, sig string, cmd parser.ParsedCommand) bool {
 		}
 	}
 
-	return false
-}
-
-// matchesExcludePatterns checks if command matches any exclude patterns
-func (m *Matcher) matchesExcludePatterns(rule config.Rule, command string) bool {
-	for _, re := range rule.GetCompiledExcludePatterns() {
-		if re.MatchString(command) {
-			return true
-		}
-	}
 	return false
 }
 

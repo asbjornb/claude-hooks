@@ -57,9 +57,6 @@ commands = [
     "git reset",
     "git show",
 ]
-# Block shell injection in git commands
-exclude_patterns = ["&", ";", "\\|", "`", "\\$\\("]
-
 # Note: git push is intentionally NOT included - approve manually per project
 
 # .NET development commands
@@ -77,8 +74,6 @@ commands = [
     "dotnet tool",
     "dotnet publish",
 ]
-exclude_patterns = ["&", ";", "\\|", "`", "\\$\\("]
-
 # Wrapper commands - timeout with various values
 [[allow]]
 tool = "Bash"
@@ -91,8 +86,6 @@ commands = [
     "timeout node",
     "timeout python",
 ]
-exclude_patterns = ["&", ";", "\\|", "`", "\\$\\("]
-
 # Node.js development
 [[allow]]
 tool = "Bash"
@@ -111,8 +104,6 @@ commands = [
     "pnpm install",
     "pnpm run",
 ]
-exclude_patterns = ["&", ";", "\\|", "`", "\\$\\("]
-
 # Safe read-only commands
 [[allow]]
 tool = "Bash"
@@ -146,18 +137,16 @@ commands = [
     "glab issue",
     "glab mr",
 ]
-exclude_patterns = ["&", ";", "\\|", "`", "\\$\\("]
-
-# Database queries (read-only)
+# Database queries (review carefully before allowing)
 [[allow]]
 tool = "Bash"
-description = "Database CLI (read-only)"
+description = "Database CLI (review queries)"
 commands = [
     "sqlite3",
     "psql -c",
 ]
-# Exclude write operations
-exclude_patterns = ["INSERT", "UPDATE", "DELETE", "DROP", "CREATE", "ALTER", "TRUNCATE"]
+#
+# Note: This allows any query. If you want to block writes, add explicit deny rules.
 
 # File system operations in specific directories
 [[allow]]
