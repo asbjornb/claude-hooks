@@ -32,6 +32,7 @@ type Matcher struct {
 
 // New creates a new Matcher with the given configuration
 func New(cfg *config.Config) *Matcher {
+	parser.SetSubcommandTools(cfg.SubcommandTools)
 	return &Matcher{cfg: cfg}
 }
 

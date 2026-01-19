@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"path/filepath"
 	"regexp"
 	"sort"
 	"strings"
@@ -56,7 +57,7 @@ Commands:
   parse     Parse a shell command and show its structure
 
 Usage:
-  claude-permissions-hook init
+  claude-permissions-hook init [--config <config.toml>]
   claude-permissions-hook run --config <config.toml>
   claude-permissions-hook validate --config <config.toml>
   claude-permissions-hook analyze --allowlist <permissions.json>
@@ -68,17 +69,25 @@ For more information, see the README.md`)
 // initCmd creates a default configuration file
 func initCmd(args []string) {
 	fs := flag.NewFlagSet("init", flag.ExitOnError)
+	configPathFlag := fs.String("config", "", "Path to TOML configuration file")
 	fs.Parse(args)
 
 	// Get config path
-	homeDir, err := os.UserHomeDir()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error getting home directory: %v\n", err)
-		os.Exit(1)
+	configPath := *configPathFlag
+	if configPath == "" {
+		configDir, err := os.UserConfigDir()
+		if err != nil {
+			homeDir, err := os.UserHomeDir()
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Error getting home directory: %v\n", err)
+				os.Exit(1)
+			}
+			configDir = filepath.Join(homeDir, ".config")
+		}
+		configPath = filepath.Join(configDir, "claude-permissions.toml")
 	}
 
-	configDir := homeDir + "/.config"
-	configPath := configDir + "/claude-permissions.toml"
+	configDir := filepath.Dir(configPath)
 
 	// Check if config already exists
 	if _, err := os.Stat(configPath); err == nil {

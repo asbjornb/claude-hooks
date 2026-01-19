@@ -11,6 +11,9 @@ audit_file = "/tmp/claude-permissions.json"
 # - all: audit everything including passthrough
 audit_level = "matched"
 
+# Optional: override which tools treat the first non-flag arg as a subcommand.
+# subcommand_tools = ["git", "dotnet", "npm", "go", "helm"]
+
 # =============================================================================
 # DENY RULES - Checked first, block dangerous operations
 # =============================================================================

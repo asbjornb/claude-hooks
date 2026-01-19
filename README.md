@@ -196,6 +196,15 @@ description = "dotnet with timeout"
 commands = ["timeout dotnet", "dotnet build", "dotnet run", "dotnet test"]
 ```
 
+### Subcommand Tools
+
+By default, a fixed list of tools treat the first non-flag arg as a subcommand (e.g. `git commit`, `npm run`).
+You can override that list if you need support for additional tools:
+
+```toml
+subcommand_tools = ["git", "dotnet", "npm", "go", "helm"]
+```
+
 ## Claude Code Setup
 
 Run `/hooks` in Claude Code and add a PreToolUse hook with:

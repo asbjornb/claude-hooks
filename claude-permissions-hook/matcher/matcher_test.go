@@ -25,6 +25,7 @@ func TestTimeoutDotnetPattern(t *testing.T) {
 		want    Decision
 	}{
 		{"timeout 30 dotnet run", DecisionAllow},
+		{"timeout 30s dotnet run", DecisionAllow},
 		{"timeout 45 dotnet run", DecisionAllow},
 		{"timeout 50 dotnet run", DecisionAllow},
 		{"timeout 35 dotnet run", DecisionAllow},
@@ -33,7 +34,7 @@ func TestTimeoutDotnetPattern(t *testing.T) {
 		{"timeout 60 dotnet build", DecisionAllow},
 		{"timeout 30 dotnet run --project src/App", DecisionAllow},
 		// These should NOT match
-		{"dotnet run", DecisionPassthrough},         // no timeout wrapper
+		{"dotnet run", DecisionPassthrough},               // no timeout wrapper
 		{"timeout 30 npm run build", DecisionPassthrough}, // different command
 	}
 
@@ -82,7 +83,7 @@ func TestGitCommitFlow(t *testing.T) {
 
 		// Compound commands
 		{"git add -A && git commit -m 'test'", DecisionAllow},
-		{"git add -A && git push", DecisionDeny},  // push is denied
+		{"git add -A && git push", DecisionDeny},          // push is denied
 		{"git add -A && git rebase", DecisionPassthrough}, // rebase not in allow list
 	}
 
@@ -109,7 +110,7 @@ func TestDenyTakesPrecedence(t *testing.T) {
 		Allow: []config.Rule{
 			{
 				Tool:        "Bash",
-				Commands:    []string{"git"},  // Would match all git commands
+				Commands:    []string{"git"}, // Would match all git commands
 				Description: "All git",
 			},
 		},

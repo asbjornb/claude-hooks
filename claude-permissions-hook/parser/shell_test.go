@@ -144,6 +144,11 @@ func TestParseTimeoutWrapper(t *testing.T) {
 			wantSig: "timeout dotnet run",
 		},
 		{
+			name:    "timeout 30s",
+			input:   "timeout 30s dotnet run",
+			wantSig: "timeout dotnet run",
+		},
+		{
 			name:    "timeout 45",
 			input:   "timeout 45 dotnet run",
 			wantSig: "timeout dotnet run",

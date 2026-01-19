@@ -241,6 +241,23 @@ var subcommandCommands = map[string]bool{
 	"dotnet-ef": true,
 }
 
+// SetSubcommandTools overrides the default list of subcommand tools.
+func SetSubcommandTools(tools []string) {
+	if len(tools) == 0 {
+		return
+	}
+	overrides := make(map[string]bool, len(tools))
+	for _, tool := range tools {
+		if tool == "" {
+			continue
+		}
+		overrides[tool] = true
+	}
+	if len(overrides) > 0 {
+		subcommandCommands = overrides
+	}
+}
+
 func isSubcommandCommand(cmdName string) bool {
 	return subcommandCommands[cmdName]
 }
@@ -335,10 +352,28 @@ func CommandSignature(cmd ParsedCommand) string {
 }
 
 func isNumeric(s string) bool {
-	for _, c := range s {
-		if c < '0' || c > '9' {
-			return false
+	// Accept numeric durations like 30, 30s, 1.5m, 0.5
+	if s == "" {
+		return false
+	}
+	i := 0
+	hasDigit := false
+	for i < len(s) && s[i] >= '0' && s[i] <= '9' {
+		i++
+		hasDigit = true
+	}
+	if i < len(s) && s[i] == '.' {
+		i++
+		for i < len(s) && s[i] >= '0' && s[i] <= '9' {
+			i++
+			hasDigit = true
 		}
 	}
-	return len(s) > 0
+	if !hasDigit {
+		return false
+	}
+	for i < len(s) && ((s[i] >= 'a' && s[i] <= 'z') || (s[i] >= 'A' && s[i] <= 'Z')) {
+		i++
+	}
+	return i == len(s)
 }

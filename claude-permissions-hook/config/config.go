@@ -11,9 +11,10 @@ import (
 
 // Config is the root configuration structure
 type Config struct {
-	Audit  AuditConfig  `toml:"audit"`
-	Allow  []Rule       `toml:"allow"`
-	Deny   []Rule       `toml:"deny"`
+	Audit           AuditConfig `toml:"audit"`
+	Allow           []Rule      `toml:"allow"`
+	Deny            []Rule      `toml:"deny"`
+	SubcommandTools []string    `toml:"subcommand_tools"`
 }
 
 // AuditConfig controls logging behavior
