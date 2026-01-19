@@ -359,6 +359,7 @@ claude-permissions-hook analyze --allowlist .claude/settings.local.json --format
 1. **Subshell detection**: The parser flags `$(...)` and `` `...` `` constructs
 2. **Deny first**: Deny rules are checked before allow rules
 3. **Compound safety**: All commands in `&&`/`||`/`;` must be allowed
+4. **Pipes and expansions**: Pipes and substitutions are parsed into individual commands, but data exfiltration is still possible; keeping `curl`/`wget`/`scp` manual helps.
 
 ## License
 
