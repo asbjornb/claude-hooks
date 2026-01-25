@@ -36,24 +36,33 @@ For every command, the hook returns one of:
 - **DENY** – Command is blocked entirely (Claude cannot proceed)
 - **PASSTHROUGH** – Claude asks *you* for approval, as usual
 
-## Quickstart (2 minutes)
+## Quickstart
 
 ```bash
-# 1. Install (requires Go 1.22+)
-go install github.com/asbjornb/claude-hooks/claude-permissions-hook@latest
+# 1. Clone and enter the directory
+git clone https://github.com/asbjornb/claude-hooks
+cd claude-hooks/claude-permissions-hook
 
-# 2. Initialize config (generates ~/.config/claude-permissions.toml)
-claude-permissions-hook init
+# 2. Copy the default config and customize it
+cp default-config.toml my-config.toml
+code my-config.toml  # Add rules for your stack
 
-# 3. Open Claude Code, run /hooks, and add a PreToolUse hook:
-#    Matcher: Bash|Read|Write|Edit
-#    Command: claude-permissions-hook run --config ~/.config/claude-permissions.toml
-
-# 4. (Optional) Edit the config to add rules for your stack
-code ~/.config/claude-permissions.toml
+# 3. Run setup (builds binary, copies config, installs hook)
+./setup.sh
 ```
 
-**Building from source?** Use `go build .` then `./claude-permissions-hook init`.
+That's it. The setup script:
+- Builds the Go binary (requires Go 1.22+)
+- Copies `my-config.toml` to `~/.config/claude-permissions.toml`
+- Adds the PreToolUse hook to `~/.claude/settings.json`
+
+**Alternative: Install globally**
+
+```bash
+go install github.com/asbjornb/claude-hooks/claude-permissions-hook@latest
+claude-permissions-hook init
+# Then manually add hook via /hooks in Claude Code
+```
 
 The [default config](claude-permissions-hook/default-config.toml) allows safe git commands (no history manipulation). See [example.toml](example.toml) for a more complete configuration with dotnet, npm, and other stacks.
 
@@ -98,6 +107,19 @@ tool = "Bash"
 description = "Node.js tooling"
 commands = ["npm install", "npm run", "npm test", "yarn build", "pnpm run"]
 ```
+
+### Claude Code Skills
+
+Auto-approve specific skills without prompts:
+
+```toml
+[[allow]]
+tool = "Skill"
+description = "Project management and observability"
+commands = ["grafana", "gitlab", "jira", "history"]
+```
+
+Or allow all skills with `commands = ["*"]`.
 
 ## Key Features
 
@@ -226,18 +248,20 @@ If any of these are set to `false`, commands that use them will fall back to nor
 
 ## Claude Code Setup
 
-Run `/hooks` in Claude Code and add a PreToolUse hook with:
-- **Matcher**: `Bash` (or `Bash|Read|Write|Edit` for file operations too)
-- **Command**: `claude-permissions-hook run --config ~/.config/claude-permissions.toml`
+The `./setup.sh` script handles this automatically. If you need to set it up manually:
 
-Or manually add to `.claude/settings.json`:
+Run `/hooks` in Claude Code and add a PreToolUse hook with:
+- **Matcher**: `Bash|Read|Write|Edit|Skill` (or just the tools you want to control)
+- **Command**: `/path/to/claude-permissions-hook run --config ~/.config/claude-permissions.toml`
+
+Or manually add to `~/.claude/settings.json`:
 
 ```json
 {
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "Bash",
+        "matcher": "Bash|Read|Write|Edit|Skill",
         "hooks": [
           {
             "type": "command",
@@ -339,6 +363,30 @@ description = "Git commands"
 tool = "Read"
 path_patterns = ["^/home/user/projects/"]
 path_exclude_patterns = ["\\.\\.", "node_modules"]
+```
+
+### Skill Matching
+
+Control which Claude Code skills (like `/grafana`, `/gitlab`, `/jira`) are auto-approved:
+
+```toml
+# Allow all skills
+[[allow]]
+tool = "Skill"
+description = "Allow all skills"
+commands = ["*"]
+
+# Or allow specific skills
+[[allow]]
+tool = "Skill"
+description = "Observability tools"
+commands = ["grafana", "history", "gitlab"]
+
+# Block specific skills
+[[deny]]
+tool = "Skill"
+description = "Block dangerous skill"
+commands = ["some-risky-skill"]
 ```
 
 ## How It Works

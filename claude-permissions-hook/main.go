@@ -109,7 +109,7 @@ func initCmd(args []string) {
 	}
 	fmt.Println("Next step: Run /hooks in Claude Code and add a PreToolUse hook:")
 	fmt.Println()
-	fmt.Println("  Matcher: Bash|Read|Write|Edit")
+	fmt.Println("  Matcher: Bash|Read|Write|Edit|Skill")
 	fmt.Printf("  Command: claude-permissions-hook run --config %s\n", configPath)
 	fmt.Println()
 	fmt.Println("Edit the config to customize which commands are allowed/denied.")
@@ -157,6 +157,14 @@ func runCmd(args []string) {
 			return
 		}
 		result = m.MatchFilePath(input.ToolName, path)
+
+	case "Skill":
+		skillName := input.GetSkillName()
+		if skillName == "" {
+			hook.WritePassthrough()
+			return
+		}
+		result = m.MatchSkill(skillName)
 
 	default:
 		// Passthrough for other tools

@@ -70,3 +70,17 @@ commands = [
 # tool = "Bash"
 # description = "Node.js"
 # commands = ["npm install", "npm run", "npm test", "yarn build"]
+#
+# =============================================================================
+# SKILL RULES - Control Claude Code skills (requires Skill matcher in /hooks)
+# =============================================================================
+#
+# [[allow]]
+# tool = "Skill"
+# description = "Allow all skills"
+# commands = ["*"]
+#
+# [[allow]]
+# tool = "Skill"
+# description = "Observability and project tools"
+# commands = ["grafana", "gitlab", "jira", "history"]

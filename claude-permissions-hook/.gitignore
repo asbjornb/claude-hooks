@@ -1,1 +1,4 @@
 claude-permissions-hook
+
+# Local config (not tracked) - copy default-config.toml to this file
+my-config.toml

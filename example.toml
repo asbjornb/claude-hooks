@@ -162,6 +162,30 @@ path_patterns = ["^/mnt/c/code/", "^/home/"]
 path_exclude_patterns = ["\\.\\.", "node_modules", "\\.git/"]
 
 # =============================================================================
+# SKILL RULES - Claude Code skills (e.g., /grafana, /gitlab, /jira)
+# =============================================================================
+# Skills are custom commands in Claude Code. Use "*" to allow all skills,
+# or list specific skill names.
+
+# Allow all skills (most permissive)
+# [[allow]]
+# tool = "Skill"
+# description = "Allow all skills"
+# commands = ["*"]
+
+# Or allow specific skills
+[[allow]]
+tool = "Skill"
+description = "Observability and project management"
+commands = ["grafana", "gitlab", "jira", "history", "pipeline", "repo-db"]
+
+# Block specific skills if needed
+# [[deny]]
+# tool = "Skill"
+# description = "Block risky skill"
+# commands = ["some-dangerous-skill"]
+
+# =============================================================================
 # COMPOUND COMMANDS
 # =============================================================================
 # The key feature of this tool: compound commands like "git add -A && git commit -m msg"

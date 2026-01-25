@@ -114,6 +114,14 @@ func (h *HookInput) GetFilePath() string {
 	return ""
 }
 
+// GetSkillName extracts the skill name from Skill tool input
+func (h *HookInput) GetSkillName() string {
+	if skill, ok := h.ToolInput["skill"].(string); ok {
+		return skill
+	}
+	return ""
+}
+
 // WriteAuditEntry writes an entry to the audit file
 func WriteAuditEntry(auditFile string, entry AuditEntry) error {
 	if auditFile == "" {

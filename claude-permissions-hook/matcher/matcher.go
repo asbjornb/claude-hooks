@@ -281,3 +281,56 @@ func (m *Matcher) MatchFilePath(toolName, filePath string) MatchResult {
 		Reason:   "No rule matched for path",
 	}
 }
+
+// MatchSkill checks a skill name against rules for Skill tool
+func (m *Matcher) MatchSkill(skillName string) MatchResult {
+	// Check deny rules first
+	for _, rule := range m.cfg.Deny {
+		if rule.Tool != "Skill" {
+			continue
+		}
+
+		if matchesSkillRule(rule, skillName) {
+			return MatchResult{
+				Decision:    DecisionDeny,
+				Reason:      "Skill matched deny rule",
+				MatchedRule: rule.Description,
+			}
+		}
+	}
+
+	// Check allow rules
+	for _, rule := range m.cfg.Allow {
+		if rule.Tool != "Skill" {
+			continue
+		}
+
+		if matchesSkillRule(rule, skillName) {
+			return MatchResult{
+				Decision:    DecisionAllow,
+				Reason:      "Skill matched allow rule",
+				MatchedRule: rule.Description,
+			}
+		}
+	}
+
+	return MatchResult{
+		Decision: DecisionPassthrough,
+		Reason:   "No rule matched for skill",
+	}
+}
+
+// matchesSkillRule checks if a skill name matches a rule's commands list
+func matchesSkillRule(rule config.Rule, skillName string) bool {
+	for _, cmd := range rule.Commands {
+		// Wildcard matches all skills
+		if cmd == "*" {
+			return true
+		}
+		// Exact match
+		if cmd == skillName {
+			return true
+		}
+	}
+	return false
+}
